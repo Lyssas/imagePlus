@@ -29,8 +29,106 @@ $(document).ready(function(){
       			if ($('#clickSlideshow img').length > 0) 
       			{
 
-				var sizeOfClickSlideshow = $('#clickSlideshow img').length;
-		
+				var sizeOfClickSlideshow = $('#clickSlideshow img').length,
+				nextClickSlideshowImage,
+				previousClickSlideshowImage,
+				clickSlideshowCurrent = sizeOfClickSlideshow;
+				
+				nextClickSlideshowImage = function() 
+				{
+					if(clickSlideshowCurrent == sizeOfClickSlideshow)
+					{
+						clickSlideshowCurrent = 1;	
+					}
+					else
+					{
+						clickSlideshowCurrent += 1;	
+					}
+					$('#clickSlideshowContainer img').each(function() 
+					{
+						var z = $(this).css('z-index'),
+						next = sizeOfClickSlideshow - 1;
+						
+					
+						if(z < sizeOfClickSlideshow)
+						{
+							var newZ = parseInt(z) + 1;
+							$(this).css({'z-index': newZ});
+							if(z == next)
+							{
+								$(this).fadeToggle(parseInt(options.clickFadeSpeed));	
+							}
+						}
+						else
+						{	
+							$(this).css({'z-index': 1});
+							$(this).fadeToggle(parseInt(options.clickFadeSpeed));
+						}	
+						
+						
+						
+					});
+					
+					//change the selector
+					for(var i = 1; i <= sizeOfClickSlideshow; i++)
+					{
+						if(i != clickSlideshowCurrent)
+						{
+							$('#clickSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/unselected.png')
+						}
+						else
+						{
+							$('#clickSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/selected.png')	
+						}
+					}
+				}
+				previousClickSlideshowImage = function() 
+				{
+					if(clickSlideshowCurrent == 1)
+					{
+						clickSlideshowCurrent = sizeOfClickSlideshow;	
+					}
+					else
+					{
+						clickSlideshowCurrent -= 1;	
+					}
+					$('#clickSlideshowContainer img').each(function() 
+					{
+						var z = $(this).css('z-index'),
+						next = 1;
+						
+						if(z > next)
+						{
+							var newZ = parseInt(z) - 1;
+							$(this).css({'z-index': newZ});
+							if(z == sizeOfClickSlideshow)
+							{
+								$(this).fadeToggle(parseInt(options.clickFadeSpeed));	
+							}
+						}
+						else
+						{	
+							$(this).css({'z-index': sizeOfClickSlideshow});
+							$(this).fadeToggle(parseInt(options.clickFadeSpeed));
+						}		
+					});
+					//change the selector
+					for(var i = 1; i <= sizeOfClickSlideshow; i++)
+					{
+						if(i != clickSlideshowCurrent)
+						{
+							$('#clickSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/unselected.png')
+						}
+						else
+						{
+							$('#clickSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/selected.png')	
+						}
+					}
+				}
 				//Create the slideshow from the pictures stored in div#sliderContainer 
 				$('#clickSlideshowContainer').css({
 						'position':'relative',
@@ -51,37 +149,58 @@ $(document).ready(function(){
 					})
 					.hide()
 					.appendTo('#clickSlideshowContainer')
+					
+					//Add selectors
+					$('<img>')
+					.attr('src', 'imagePlus/img/unselected.png')
+					.attr('id', 'clickSlideshowNode'+i)
+					.css({
+					'float': 'left',
+					})					
+					.appendTo('#clickSlideshowWrapper')
 				
 					if(i == sizeOfClickSlideshow)
 					{
-						$('#clickSlideshowContainer img').last().fadeToggle(1);	
+						$('#clickSlideshowContainer img').last().fadeToggle(1);
+						
+						//Add selected
+						$('#clickSlideshowNode'+i)
+						.attr('src', 'imagePlus/img/selected.png')
 					}
 					i++;	
 				});
+				//Create UI
+				$('<img>')
+					.attr('src', 'imagePlus/img/next.png')
+					.attr('id', 'clickSlideshowNext')
+					.css({
+					'float': 'right',
+				
+					})					
+					.appendTo('#clickSlideshowWrapper')
+				$('<img>')
+					.attr('src', 'imagePlus/img/previous.png')
+					.attr('id', 'clickSlideshowPrevious')
+					.css({
+					'float': 'right',
+					
+					})					
+					.appendTo('#clickSlideshowWrapper')
+				
+				$('<div>')
+					.css({
+					'clear': 'both',
+					})					
+					.appendTo('#clickSlideshowWrapper')
 			
 				//Change image on click
-				$('#clickSlideshowContainer img').click(function()
+				$('#clickSlideshowNext').click(function()
 				{
-					$('#clickSlideshowContainer img').each(function() 
-					{
-						var z = $(this).css('z-index'),
-						next = sizeOfClickSlideshow - 1;
-					
-						if(z < sizeOfClickSlideshow)
-						{
-							var newZ = parseInt(z) + 1;
-							$(this).css({'z-index': newZ});
-							if(z == next)
-							{
-								$(this).fadeToggle(parseInt(options.clickFadeSpeed));	
-							}
-						}
-						else
-						{	
-							$(this).css({'z-index': 1});
-							$(this).fadeToggle(parseInt(options.clickFadeSpeed));
-						}		
-					});								
+					nextClickSlideshowImage();								
+				});
+				$('#clickSlideshowPrevious').click(function()
+				{
+					previousClickSlideshowImage();								
 				});
       			};
       		
@@ -93,7 +212,11 @@ $(document).ready(function(){
       				//Set variables
       				var sizeOfTimerSlideshow = $('#timerSlideshow img').length,
 				intervallId = null,
-				changeSlideshow;
+				changeSlideshow,
+				timerSlideshowCurrent = sizeOfTimerSlideshow,
+				timerSlideshowPlay,
+				timerSlideshowPause,
+				timerSlideshowPlaying = true;
 				
 				//Build the slideshow from the images in div#timerSlideshow
 				$('#timerSlideshowContainer').css({
@@ -115,21 +238,87 @@ $(document).ready(function(){
 					})
 					.hide()
 					.appendTo('#timerSlideshowContainer')
-						
+					
+					if(options.timerInterfaceSelectors = true)
+					{
+						//Add selectors
+						$('<img>')
+						.attr('src', 'imagePlus/img/unselected.png')
+						.attr('id', 'timerSlideshowNode'+i)
+						.css({
+						'float': 'left',
+						})					
+						.appendTo('#timerSlideshowWrapper')
+					}
 					if(i == sizeOfTimerSlideshow)
 					{
 						$('#timerSlideshowContainer img').last().fadeToggle(1);	
+						
+						if(options.timerInterfaceSelectors = true)
+						{
+							//Add selected
+							$('#timerSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/selected.png')
+						}
 					}
 					i++;
 						
 				});
-				
+				//Create UI
+				if(options.timerInterfacePlay = true)
+				{
+					$('<img>')
+						.attr('src', 'imagePlus/img/pause.png')
+						.attr('id', 'timerSlideshowPlaytoggle')
+						.css({
+						'float': 'right',
+					
+						})					
+						.appendTo('#timerSlideshowWrapper')
+				}
 				//Set timer and function on intervall
 				intervallId = setInterval(function(){changeSlideshow();}, options.timerChangeFrequency);				
+				
+				timerSlideshowPlay = function()
+				{
+					$('#timerSlideshowPlaytoggle')
+					.attr('src', 'imagePlus/img/pause.png')
+					intervallId = setInterval(function(){changeSlideshow();}, options.timerChangeFrequency);
+				}
+				
+				timerSlideshowPause = function()
+				{
+					$('#timerSlideshowPlaytoggle')
+					.attr('src', 'imagePlus/img/play.png')
+					window.clearInterval(intervallId);
+				}
+				
+				$('#timerSlideshowPlaytoggle').click(function()
+				{
+					if(timerSlideshowPlaying == true)
+					{
+						timerSlideshowPlaying = false;
+						timerSlideshowPause();	
+					}
+					else
+					{
+						timerSlideshowPlaying = true;
+						timerSlideshowPlay();
+					}
+					
+				});
 				
 				//Change image
 				changeSlideshow = function()
 				{
+					if(timerSlideshowCurrent == sizeOfClickSlideshow)
+					{
+						timerSlideshowCurrent = 1;	
+					}
+					else
+					{
+						timerSlideshowCurrent += 1;	
+					}
 					$('#timerSlideshowContainer img').each(function() 
 					{
 						var timerZ = $(this).css('z-index'),
@@ -152,7 +341,20 @@ $(document).ready(function(){
 						}
 						
 					});
-					
+					//change the selector
+					for(var i = 1; i <= sizeOfTimerSlideshow; i++)
+					{
+						if(i != timerSlideshowCurrent)
+						{
+							$('#timerSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/unselected.png')
+						}
+						else
+						{
+							$('#timerSlideshowNode'+i)
+							.attr('src', 'imagePlus/img/selected.png')	
+						}
+					}
 				};
       			};
       			
@@ -353,7 +555,10 @@ $(document).ready(function(){
 			$('.lightbox').click(function() 
 			{
 				var windowHeight = window.innerHeight, 
-				windowWidth  = window.innerWidth;
+				windowWidth  = window.innerWidth,
+				lb_imageDescription = $(this).attr('description'),
+				lb_imgWidth,
+				lb_imgElement;
 				
 				// hide scrollbars!
 				$('body').css('overflow-y', 'hidden'); 
@@ -376,37 +581,71 @@ $(document).ready(function(){
 				    .css({
 				    	'position': 'fixed',
 				    	'z-index': '999',
+				    	//'border': '5px solid #aabb00',
 				    	})
 				    .hide()
 				    .appendTo('body');
+				   
+				
 				    
 				$('<img id="lb_lbimg">')
 				    .attr('src', $(this).attr('src'))
 				    .css({
 						
-						'max-height': windowHeight-16,
+						'max-height': windowHeight-6,
 						'max-width': windowWidth-16,
 						'background': '#000000',
 						'padding': '8px',
 				})
-				    
+				
 				 
 				    .load(function() {
 					positionLightboxImage();
+					
 				    })
 				    
 				    .click(function() {
 						    removeLightbox();
 				    })
 				    .appendTo('#lb_lightbox');
-		  
+				
+
+					$('<div>')
+					.attr('id', 'lb_imageDescription')
+						.css({
+						'background': '#000',
+						'color': '#FFF',
+						'padding-top' : '2px',
+						'padding-left' : '4px',
+						'padding-right' : '4px',
+						'position': 'relative',
+						'top': '-63px',
+						'border-top': '2px solid #000',
+						'border-bottom': '8px solid #000',
+						'border-left': '8px solid #000',
+						'border-right': '8px solid #000',
+						'text-align': 'center',
+						'height': '50px',
+						'overflow-y': 'auto',
+						'overflow-x': 'hidden',
+						'width': '0',
+					})
+					.appendTo('#lb_lightbox');
+					
+					$('<p>')
+					.text(lb_imageDescription)
+					.appendTo('#lb_imageDescription');
+				
+				
+					
 				    return false;
 			
 				});
 			
 				function positionLightboxImage() {
-					var top = ($(window).height() - $('#lb_lightbox').height()) / 2;
+					var top = ($(window).height() - $('#lb_lightbox').height()) / 2+34;
 					var left = ($(window).width() - $('#lb_lightbox').width()) / 2;
+					//alert($('#lb_lightbox').width());
 					$('#lb_lightbox')
 					.css({
 							'top': top,
@@ -414,7 +653,18 @@ $(document).ready(function(){
 							'position': 'fixed',
 				    	'z-index': '999',
 					})
+					
 					.fadeIn();
+					
+					//lb_imgElement = document.getElementById('lb_lightbox'); 
+					//lb_imgWidth = 
+					//alert($('#lb_lightbox').width());
+					$('#lb_imageDescription')
+					.css({
+						
+						'width': $('#lb_lightbox img').width()-7,
+						
+					})
 				}
 		
 				function removeLightbox() 
@@ -439,6 +689,8 @@ $(document).ready(function(){
       		'timerSliderHeight'		:  	'300px',
       		'timerChangeFrequency'		:  	'7000',
       		'timerFadeSpeed'		:  	'2000',
+      		'timerInterfaceSelectors'	:	true,
+      		'timerInterfacePlay'		:	true,
       		
       		'galleryPadding'		:	'10',
 		'galleryWidth'			:	'800', //Height gets set in proportion
